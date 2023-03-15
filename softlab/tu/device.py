@@ -171,6 +171,61 @@ class Device(Delegated):
         if isinstance(child, Device):
             child.parent = None
         return child
+    
+class DeviceBuilder():
+    """
+    Builder to gerenate specific device.
+    
+    Different builders differ due to their different models.
+    """
+
+    def __init__(self, model: str) -> None:
+        """
+        Initialization
+        
+        Args:
+            model --- builder model
+        """
+        model = str(model)
+        if len(model) == 0:
+            raise ValueError('Empty device builder model')
+        self._model = model
+
+    @property
+    def model(self) -> str:
+        """Get builder model"""
+        return self._model
+
+    def __repr__(self) -> str:
+        return f'<DeviceBuilder>{self.model}'
+    
+    def build(self, name: str, **kwargs) -> Device:
+        """
+        Generate a device, implemented in sub classes
+
+        Args:
+            name --- device name
+            kwargs --- key specific arguments to create device
+        
+        Returns:
+            a device corresponding to such builder
+        """
+        raise NotImplementedError
+    
+_device_builders: Dict[str, DeviceBuilder] = {}
+"""Global dictionary of device builders"""
+
+def register_device_builder(builder: DeviceBuilder) -> None:
+    """Register device builder"""
+    if not isinstance(builder, DeviceBuilder):
+        raise TypeError(f'Invalid device builder type {type(builder)}')
+    if builder.model in _device_builders:
+        raise ValueError(f'Device builder with model {builder.model} has exist')
+    _device_builders[builder.model] = builder
+
+def get_device_builder(model: str) -> Optional[DeviceBuilder]:
+    """Get device builder with given ``model``, return None if non-exist"""
+    return _device_builders.get(model, None)
 
 if __name__ == '__main__':
     import pprint
@@ -197,3 +252,24 @@ if __name__ == '__main__':
     print('After setting')
     print(f'Parameter values: {dev.para0()}, {dev.para1()}, '
           f'{dev.para2()}, {dev.child0.para3()}')
+    
+    class _BuilderDemo(DeviceBuilder):
+        def __init__(self) -> None:
+            super().__init__('demo')
+
+        def build(self, name: str, **_) -> Device:
+            dev = Device(name)
+            dev.add_parameter(
+                Parameter('percentage', ValNumber(0.0, 100.0), init_value=3.14))
+            return dev
+        
+    builder = _BuilderDemo() # create a demo builder
+    print(f'Create demo builder {builder}')
+    dev2 = builder.build('built')
+    print(f'Use builder to generate a device')
+    pprint.pprint(dev2.snapshot())
+    print('Register the builder')
+    register_device_builder(builder)
+    print(f'Get builder with model {builder.model}: '
+          f'{get_device_builder(builder.model)}')
+    print(f'Get builder with model 123: {get_device_builder("123")}')
