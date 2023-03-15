@@ -75,7 +75,7 @@ class Device(Delegated):
 
     def __repr__(self) -> str:
         return f'{type(self)}/{self.name}'
-    
+
     def snapshot(self) -> Dict[str, Any]:
         """Get snapshot of device information"""
         return {
@@ -199,7 +199,7 @@ class DeviceBuilder():
     def __repr__(self) -> str:
         return f'<DeviceBuilder>{self.model}'
     
-    def build(self, name: str, **kwargs) -> Device:
+    def build(self, name: str, **kwargs: Any) -> Device:
         """
         Generate a device, implemented in sub classes
 
