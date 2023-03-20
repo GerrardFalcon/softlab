@@ -7,8 +7,8 @@ from typing import (
     Optional,
     Sequence,
 )
-from softlab.shui.data import DataGroup
-from softlab.shui.data_backend import (
+from softlab.shui.data.base import DataGroup
+from softlab.shui.data.backend import (
     get_data_backend,
     get_data_backend_by_info,
 )

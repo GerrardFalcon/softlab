@@ -8,7 +8,7 @@ from typing import (
     Sequence,
 )
 from abc import abstractmethod
-from softlab.shui.data import (
+from softlab.shui.data.base import (
     DataGroup,
     DataRecord,
     DataChart,
