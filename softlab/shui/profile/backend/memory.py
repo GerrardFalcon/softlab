@@ -8,8 +8,8 @@ from typing import (
     Sequence,
     Dict,
 )
-from triq.profile.backend.base import ProfileBackend
-from triq.profile import Profile
+from softlab.shui.profile.backend.base import ProfileBackend
+from softlab.shui.profile.base import Profile
 
 _profiles: Dict[str, Profile] = {}
 
@@ -18,26 +18,26 @@ class MemoryProfileBackend(ProfileBackend):
     def __init__(self) -> None:
         super().__init__('memory')
 
-    def connect_raw(self, _: Dict[str, Any]) -> bool:
+    def connect_impl(self, _: Dict[str, Any]) -> bool:
         return True
 
-    def disconnect_raw(self) -> bool:
+    def disconnect_impl(self) -> bool:
         return True
 
-    def list_raw(self) -> Sequence[str]:
+    def list_impl(self) -> Sequence[str]:
         return list(_profiles.keys())
 
-    def load_raw(self, id: str) -> Optional[Profile]:
+    def load_impl(self, id: str) -> Optional[Profile]:
         return _profiles.get(id, None)
 
-    def save_raw(self, profile: Profile) -> bool:
+    def save_impl(self, profile: Profile) -> bool:
         if isinstance(profile, Profile):
             _profiles[profile.profile_id] = profile
             return True
         else:
             return False
 
-    def remove_raw(self, id: str) -> None:
+    def remove_impl(self, id: str) -> None:
         _profiles.pop(id, None)
 
 if __name__ == '__main__':

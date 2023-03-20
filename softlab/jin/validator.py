@@ -5,6 +5,7 @@ from typing import (
     Sequence,
     Set,
     Union,
+    Optional,
 )
 import numpy as np
 import re
@@ -60,7 +61,7 @@ class ValidatorAll(Validator):
         return super().__repr__() + ' ({})'.format(', '.join(map(
             lambda child: repr(child), self._children
         )))
-    
+
 class ValidatorAny(Validator):
     """
     Validator requires value satisfying at least one sub validators
@@ -95,7 +96,7 @@ class ValidatorAny(Validator):
         return super().__repr__() + ' ({})'.format(', '.join(map(
             lambda child: repr(child), self._children
         )))
-    
+
 class ValAnything(Validator):
     """Validator allows all kind of values"""
     
@@ -337,6 +338,34 @@ class ValEnum(Validator):
         return super().__repr__() + ' ({})'.format(
             ', '.join(map(str, self._candidates)))
 
+class ValSequence(Validator):
+    """
+    Validator requires value is a sequence of elements satisfying sub validator
+
+    Property:
+        validator_of_element --- validator of element in sequence
+    """
+
+    def __init__(self, child: Optional[Validator] = None) -> None:
+        """Initialization with optional validator of sequence element"""
+        self._child = child if isinstance(child, Validator) else None
+
+    @property
+    def validator_of_element(self) -> Optional[Validator]:
+        return self._child
+    
+    def validate(self, value: Any, context: str = '') -> None:
+        if not isinstance(value, Sequence):
+            raise TypeError(f'Required sequence but {type(value)} in {context}')
+        if isinstance(self._child, Validator):
+            for element in value:
+                self._child.validate(element)
+
+    def __repr__(self) -> str:
+        if isinstance(self._child, Validator):
+            return f'<ValSequence({self._child})>'
+        return '<ValSequence>'
+
 if __name__ == '__main__':
     for value, validator in [
         ('5', ValType(str)),
@@ -347,6 +376,9 @@ if __name__ == '__main__':
         (12.3, ValNumber(0.0, 100.0)),
         ('on', ValEnum(('on', 'off'))),
         ('job', ValEnum(('on', 'off'))),
+        ([], ValSequence(ValInt())),
+        ([-5, 6, 78], ValSequence(ValInt(0, 100))),
+        (('5', 5), ValSequence()),
     ]:
         rst = validate_value(value, validator, 'demo')
         print(f'validate {value} by {validator}: {rst}')

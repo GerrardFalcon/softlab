@@ -13,4 +13,5 @@ from softlab.jin.validator import (
     ValInt,
     ValNumber,
     ValEnum,
+    ValSequence,
 )

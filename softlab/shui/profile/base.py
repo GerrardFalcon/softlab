@@ -1,7 +1,6 @@
 """
 Data structure of profile
 """
-from ast import arg
 from typing import (
     Any,
     Dict,
@@ -9,21 +8,18 @@ from typing import (
     Tuple,
     List,
     Optional,
-    TypeVar,
 )
 import re
 from datetime import datetime
 import logging
-from qcodes.utils.validators import (
-    Lists,
-    Ints,
-    BIGINT,
-    Numbers,
-    Strings,
-    BIGSTRING,
-    Bool,
+from softlab.jin import (
+    ValType,
+    ValInt,
+    ValNumber,
+    ValString,
+    ValPattern,
+    ValSequence,
 )
-from triq.util import PatternStrings
 
 _AVAILABLE_TYPES = [
     'string', 'int', 'float', 'bool',
@@ -79,34 +75,34 @@ class ProfileItem:
         validator_keys = []
         if value_type == 'int':
             self._parser = int
-            self._vals = Ints(
-                int(validator.get('min', -BIGINT)),
-                int(validator.get('max', BIGINT)),
+            self._vals = ValInt(
+                int(validator.get('min', -1000000000)),
+                int(validator.get('max', 1000000000)),
             )
             validator_keys = ['min', 'max']
         elif value_type == 'float':
             self._parser = float
-            self._vals = Numbers(
+            self._vals = ValNumber(
                 float(validator.get('min', '-inf')),
                 float(validator.get('max', 'inf')),
             )
             validator_keys = ['min', 'max']
         elif value_type == 'bool':
             self._parser = bool
-            self._vals = Bool()
+            self._vals = ValType(bool)
         else:
             self._parser = str
             if 'pattern' in validator:
-                self._vals = PatternStrings(str(validator['pattern']))
+                self._vals = ValPattern(str(validator['pattern']))
                 validator_keys = ['pattern']
             else:
-                self._vals = Strings(
+                self._vals = ValString(
                     int(validator.get('min', 0)),
-                    int(validator.get('max', BIGSTRING)),
+                    int(validator.get('max', 1000000)),
                 )
                 validator_keys = ['min', 'max']
         if self._is_list:
-            self._vals = Lists(self._vals)
+            self._vals = ValSequence(self._vals)
         self._validator = {}
         for v_key in validator_keys:
             if v_key in validator:

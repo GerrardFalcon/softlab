@@ -11,9 +11,11 @@ import os
 import logging
 import json
 from datetime import datetime
-from triq.profile.backend.base import ProfileBackend
-from triq.profile import Profile
-from triq.profile.base import ProfileItem
+from softlab.shui.profile.backend.base import ProfileBackend
+from softlab.shui.profile.base import (
+    Profile,
+    ProfileItem,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -69,7 +71,7 @@ class JsonProfileBackend(ProfileBackend):
         self._path: str = ''
         self._profiles: Dict[str, Profile] = {}
 
-    def connect_raw(self, args: Dict[str, Any]) -> bool:
+    def connect_impl(self, args: Dict[str, Any]) -> bool:
         self._profiles = {} # clear
         self._path = str(args.get('path', ''))
         if len(self._path) == 0:
@@ -94,18 +96,18 @@ class JsonProfileBackend(ProfileBackend):
                 return False
         return True
 
-    def disconnect_raw(self) -> bool:
+    def disconnect_impl(self) -> bool:
         self._persistance()
         self._profiles = {}
         return True
 
-    def list_raw(self) -> Sequence[str]:
+    def list_impl(self) -> Sequence[str]:
         return list(self._profiles.keys())
 
-    def load_raw(self, id: str) -> Optional[Profile]:
+    def load_impl(self, id: str) -> Optional[Profile]:
         return self._profiles.get(id, None)
 
-    def save_raw(self, profile: Profile) -> bool:
+    def save_impl(self, profile: Profile) -> bool:
         if isinstance(profile, Profile):
             self._profiles[profile.profile_id] = profile
             self._persistance()
@@ -113,7 +115,7 @@ class JsonProfileBackend(ProfileBackend):
         else:
             return False
 
-    def remove_raw(self, id: str) -> None:
+    def remove_impl(self, id: str) -> None:
         if self._profiles.pop(id, None) is not None:
             self._persistance()
 

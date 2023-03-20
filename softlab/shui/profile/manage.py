@@ -10,12 +10,10 @@ from typing import (
 import logging
 from datetime import datetime
 import uuid
-from triq.database import DatabaseBackend
-from triq.profile.base import Profile
-from triq.profile.backend import (
-    ProfileBackend,
-    get_profile_backend,
-)
+from softlab.shui import DatabaseBackend
+from softlab.shui.profile.base import Profile
+from softlab.shui.profile.backend.base import ProfileBackend
+from softlab.shui.profile.backend.getter import get_profile_backend
 
 _logger = logging.getLogger(__name__)
 
