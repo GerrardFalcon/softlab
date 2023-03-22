@@ -25,6 +25,7 @@ Public attributes:
 | ExpoChirpSignal   | class    | Exponential chirp signal                     |
 | Window            | class    | Abstract class of any window                 |
 | RectangleWindow   | class    | Rectangle window                             |
+| CosineWindow      | class    | Cosine window                                |
 | GaussianWindow    | class    | Gaussian window                              |
 | HanningWindow     | class    | Hanning window                               |
 | HammingWindow     | class    | Hamming window                               |
@@ -69,6 +70,7 @@ from softlab.tu.dsp.common import (
 from softlab.tu.dsp.window import (
     Window,
     RectangleWindow,
+    CosineWindow,
     GaussianWindow,
     HanningWindow,
     HammingWindow,

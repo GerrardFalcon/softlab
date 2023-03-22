@@ -39,6 +39,16 @@ class RectangleWindow(Window):
         ys = np.zeros_like(ts)
         ys[self.get_valids(ts)] = self.amp()
         return ys
+    
+class CosineWindow(Window):
+
+    def evaluate(self, ts: np.ndarray) -> np.ndarray:
+        ys = np.zeros_like(ts)
+        if self.duration() > 0.0:
+            freq = 1.0 / (2.0 * self.duration())
+            ys[self.get_valids(ts)] = self.amp() * np.sin(2.0 * np.pi * freq * \
+                (ts[self.get_valids(ts)] - self.begin()))
+        return ys
 
 class GaussianWindow(Window):
     """
@@ -225,6 +235,7 @@ if __name__ == '__main__':
     ts = np.linspace(0.0, 2.0e-3, 1024, endpoint=False)
     for signal in [
         RectangleWindow('rect', **kwargs),
+        CosineWindow('cosine', **kwargs),
         GaussianWindow('gauss1', 0.2e-3, **kwargs),
         #GaussianWindow('gauss2', 0.1e-3, **kwargs),
         HanningWindow('hanning', **kwargs),
@@ -233,8 +244,8 @@ if __name__ == '__main__':
         ChebyshevWindow('chebyshev1', 120.0, **kwargs),
         #ChebyshevWindow('chebyshev2', 40.0, **kwargs),
         BlackmanWindow('blackman', **kwargs),
-        SlepianWindow('slepian_0', 2.0, **kwargs),
-        SlepianWindow('slepian_3', 2.5, 3, **kwargs),
+        SlepianWindow('slepian_0', 1.0, **kwargs),
+        #SlepianWindow('slepian_3', 2.5, 3, **kwargs),
     ]:
         ys = signal(ts)
         plt.subplot(rows, cols, index)
