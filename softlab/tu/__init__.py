@@ -23,3 +23,8 @@ from softlab.tu.station import (
     default_station,
     set_default_station,
 )
+
+from softlab.tu.visa import (
+    VisaHandle,
+    VisaParameter,
+)

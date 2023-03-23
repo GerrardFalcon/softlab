@@ -138,7 +138,7 @@ class Parameter():
         """Get parameter value"""
         if not self.gettable:
             raise RuntimeError(f'Parameter {self.name} is not gettable')
-        self.before_get(self._value)
+        self._value = self.before_get(self._value)
         return self.interprete(self._value)
 
     def __call__(self, *args: Any) -> Any:
@@ -183,14 +183,17 @@ class Parameter():
         pass
 
     @abstractmethod
-    def before_get(self, value: Any) -> None:
+    def before_get(self, value: Any) -> Any:
         """
         Hook function before getting of value, implemented in derived class
 
         Args:
             value --- the inner value when ``get`` is called
+
+        Returns:
+            post manipulation value
         """
-        pass
+        return value
 
     @abstractmethod
     def interprete(self, value: Any) -> Any:
