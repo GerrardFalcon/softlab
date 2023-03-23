@@ -14,7 +14,7 @@ _logger = logging.getLogger(__name__)
 class VisaHandle():
     """
     Simple handle of VISA connection
-    
+
     Properties:
     - address --- address of visa device, read-only
     - timeout --- time-out time, unit: seconds
