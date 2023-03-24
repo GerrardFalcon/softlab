@@ -28,3 +28,7 @@ from softlab.tu.visa import (
     VisaHandle,
     VisaParameter,
 )
+
+from softlab.tu import (
+    dsp,
+)
