@@ -43,7 +43,7 @@ class Parameter():
 
     def __init__(self,
                  name: str,
-                 validator: Validator,
+                 validator: Validator = ValAnything,
                  settable: bool = True,
                  gettable: bool = True,
                  init_value: Optional[Any] = None,
