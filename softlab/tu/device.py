@@ -11,6 +11,7 @@ more than one channels generally, and each channel can abstracted into a child
 device of oscilloscope.
 """
 
+from abc import abstractmethod
 from typing import (
     Any,
     Dict,
@@ -22,7 +23,7 @@ from softlab.tu.parameter import Parameter
 class Device(Delegated):
     """
     Device base class
-    
+
     A device has a non-empty name, and contains any count of parameters and
     child devices. By inheriting ``Delegated``, any parameter and child device
     can be accessed directly as an attribute of device.
@@ -171,6 +172,16 @@ class Device(Delegated):
         if isinstance(child, Device):
             child.parent = None
         return child
+    
+    @abstractmethod
+    def open(self) -> None:
+        """Open/connect the device, needs implementation"""
+        pass
+
+    @abstractmethod
+    def close(self) -> None:
+        """Close/disconnect the device, needs implementation"""
+        pass
     
 class DeviceBuilder():
     """
