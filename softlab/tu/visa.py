@@ -335,3 +335,4 @@ class VisaIDN(VisaParameter):
                     others = f'{others} {val.strip()}'
         if len(others) > 0:
             info['others'] = others
+        return info
