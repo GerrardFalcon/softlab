@@ -27,6 +27,8 @@ from softlab.tu.station import (
 from softlab.tu.visa import (
     VisaHandle,
     VisaParameter,
+    VisaCommand,
+    VisaIDN,
 )
 
 from softlab.tu import (

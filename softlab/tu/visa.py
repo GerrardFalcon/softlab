@@ -2,6 +2,7 @@
 
 from typing import (
     Any,
+    Dict,
     Optional,
     Callable,
 )
@@ -188,6 +189,7 @@ class VisaParameter(Parameter):
                  read_after_setting: bool = False,
                  encoding: Optional[str] = None,
                  query_delay: Optional[float] = None,
+                 pre_cmd: str = '', post_cmd: str = '',
                  **kwargs) -> None:
         """
         Initialization
@@ -214,6 +216,12 @@ class VisaParameter(Parameter):
         self._read_after_setting = read_after_setting
         self._encoding = encoding
         self._delay = query_delay
+        self._pre_cmd = str(pre_cmd)
+        self._post_cmd = str(post_cmd)
+
+    @property
+    def handle(self) -> VisaHandle:
+        return self._handle
 
     def parse(self, value: Any) -> Any:
         if isinstance(self._set_parser, Callable):
@@ -222,14 +230,31 @@ class VisaParameter(Parameter):
 
     def before_set(self, current: Any, next: Any) -> None:
         if len(self._set_cmd) > 0:
+            if len(self._pre_cmd) > 0:
+                self._handle.write(self._pre_cmd)
+                if self._read_after_setting:
+                    self._handle.read()
             self._handle.write(self._set_cmd.format(next), self._encoding)
             if self._read_after_setting:
                 self._handle.read()
+            if len(self._post_cmd) > 0:
+                self._handle.write(self._post_cmd)
+                if self._read_after_setting:
+                    self._handle.read()
         return super().before_set(current, next)
 
     def before_get(self, value: Any) -> Any:
         if len(self._get_cmd) > 0:
-            return self._handle.query(self._get_cmd, self._delay)
+            if len(self._pre_cmd) > 0:
+                self._handle.write(self._pre_cmd)
+                if self._read_after_setting:
+                    self._handle.read()
+            value = self._handle.query(self._get_cmd, self._delay)
+            if len(self._post_cmd) > 0:
+                self._handle.write(self._post_cmd)
+                if self._read_after_setting:
+                    self._handle.read()
+            return value
         return super().before_get(value)
 
     def interprete(self, value: Any) -> Any:
@@ -243,3 +268,70 @@ class VisaParameter(Parameter):
             'get_cmd': self._get_cmd,
             'set_cmd': self._set_cmd,
         }
+    
+class VisaCommand(Parameter):
+    """
+    Simple visa command as a read-only command
+    """
+
+    def __init__(self, name: str, 
+                 handle: VisaHandle, cmd: str,
+                 **kwargs) -> None:
+        """
+        Initialization
+
+        Args:
+        - name --- parameter name
+        - handle --- visa device handle
+        - cmd --- command string, non-empty
+        """
+        super().__init__(name, settable=False, **kwargs)
+        if not isinstance(handle, VisaHandle):
+            raise TypeError(f'Invalid visa handle {type(handle)}')
+        self._handle = handle
+        cmd = str(cmd)
+        if len(cmd) == 0:
+            raise ValueError('Empty command')
+        self._cmd = cmd
+
+    @property
+    def handle(self) -> VisaHandle:
+        return self._handle
+
+    def before_get(self, value: Any) -> Any:
+        self._handle.write(self._cmd)
+        return super().before_get(value)
+
+    def snapshot(self) -> dict:
+        return {
+            **super().snapshot(),
+            'cmd': self._cmd,
+        }
+    
+class VisaIDN(VisaParameter):
+
+    def __init__(self, name: str, handle: VisaHandle, **kwargs) -> None:
+        super().__init__(name, handle,
+                         get_cmd='*IDN?', settable=False,
+                         **kwargs)
+
+    def interprete(self, value: str) -> Dict[str, str]:
+        parts = value.split(',')
+        info = {}
+        others = ''
+        for idx, val in enumerate(parts):
+            if idx == 0:
+                info['vendor'] = val.strip()
+            elif idx == 1:
+                info['model'] = val.strip()
+            elif idx == 2:
+                info['serial'] = val.strip()
+            elif idx == 3:
+                info['revision'] = val.strip()
+            else:
+                if len(others) == 0:
+                    others = val.strip()
+                else:
+                    others = f'{others} {val.strip()}'
+        if len(others) > 0:
+            info['others'] = others
