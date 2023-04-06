@@ -20,9 +20,11 @@ from softlab.huo.impl_scheduler import get_scheduler
 
 from softlab.huo.process import (
     Process,
+    SimpleProcess,
     CompositeProcess,
     SeriesProcess,
     ParallelProcess,
     SwitchProcess,
     SweepProcess,
+    run_process,
 )

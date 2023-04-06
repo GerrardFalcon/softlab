@@ -99,7 +99,7 @@ class HDF5DataBackend(DataBackend):
     def connect_impl(self, args: Dict[str, Any]) -> bool:
         """
         Arguments:
-        args -- hdf5 backend arguments
+        - args -- hdf5 backend arguments
             - path -- absolute path to the hdf5 data file.
         """
         path = args['path'] if 'path' in args else 'data.hdf5'
@@ -255,8 +255,8 @@ class Sqlite3DataBackend(DataBackend):
     def connect_impl(self, args: Dict[str, Any]) -> bool:
         """
         Arguments:
-        args --  sqlite3 backend arguments
-            - path -- absolute path to the sqlite database file.
+        - args --  sqlite3 backend arguments
+            - path -- absolute path to the sqlite database file
         """
         path = args['path'] if 'path' in args else 'data.db'
 
@@ -462,9 +462,9 @@ def get_data_backend(type: str,
     Get data backend
 
     Arguments:
-    type -- backend type
-    args -- connect arguments
-    connect -- whether to connect at beginning
+    - type -- backend type
+    - args -- connect arguments
+    - connect -- whether to connect at beginning
 
     Returns:
     the backend with the given type
@@ -496,9 +496,9 @@ def get_data_backend_by_info(info: Dict[str, Any],
     Get data backend by using the given information
 
     Arguments:
-    info -- backend information, 'type' key is necessary, and the optional
+    - info -- backend information, 'type' key is necessary, and the optional
             key 'arguments' related to connect arguments
-    connect -- whether to connect at beginning
+    - connect -- whether to connect at beginning
 
     Returns:
     the backend with the given type

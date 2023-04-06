@@ -286,12 +286,15 @@ class DataRecord():
         try:
             if isinstance(row, pd.DataFrame):
                 if (row.columns != self._table.columns).any():
-                    raise ValueError(f'Column names of the added rows do not match the table.')
+                    raise ValueError('Columns of the added rows don\'t match')
                 if len(self._table) > 0:
-                    data_types = {col: self._table[col].dtype for col in self._table.columns}
+                    data_types = {col: self._table[col].dtype \
+                                  for col in self._table.columns}
                 else:
-                    data_types = {col: row[col].dtype for col in self._table.columns}
-                self._table = pd.concat([self._table, row], ignore_index=True).astype(data_types)
+                    data_types = {col: row[col].dtype \
+                                  for col in self._table.columns}
+                self._table = pd.concat([self._table, row], ignore_index=True)\
+                    .astype(data_types)
             elif isinstance(row, Dict):
                 self._table = pd.concat(
                     [self._table, pd.DataFrame(row)],
@@ -459,9 +462,10 @@ class DataGroup():
         Set timestamp of acitvity
 
         Arguments:
-        ts -- timestamp, 3 possiple forms:
+        - ts --- timestamp, 4 possiple forms:
             - datetime.datetime instance
             - float value representing the seconds since 1970-01-01 00:00:00
+            - string 'now' or 'current'
             - string with the format
               ``YYYY-MM-DD[*HH[:MM[:SS[.fff[fff]]]][+HH:MM[:SS[.ffffff]]]]``
         """
@@ -470,7 +474,10 @@ class DataGroup():
         elif isinstance(ts, float):
             self._timestamp = dt.datetime.fromtimestamp(ts)
         elif isinstance(ts, str):
-            self._timestamp = dt.datetime.fromisoformat(ts)
+            if ts == 'now' or ts == 'current':
+                self._timestamp = dt.datetime.now()
+            else:
+                self._timestamp = dt.datetime.fromisoformat(ts)
         else:
             raise TypeError(f'Timestamp type is invalid: {type(ts)}')
 
@@ -586,11 +593,13 @@ if __name__ == '__main__':
     dr1 = DataRecord('dr1', columns, data)
     dr1.add_rows(pd.DataFrame([[5, 25]], columns=['x', 'y']))
     dr1.add_rows({'x': [6, 7], 'y': [36, 49]})
-    dr1.add_column('z', pd.DataFrame([[1], [8], [27], [64], [125], [216], [1]], columns=['z']), label='z')
+    dr1.add_column('z', pd.DataFrame([[1], [8], [27], [64], [125], [216], [1]],
+                                      columns=['z']), label='z')
     print(dr1.table)
     print(dr1.table.dtypes)
 
     dr1_copy = dr1.copy()
     dr1_copy.add_column('a', np.arange(7).astype(np.float32))
-    dr1_copy.add_rows(pd.DataFrame(np.random.randint(100, size=(10, 4)), columns=['x', 'y', 'z', 'a']))
+    dr1_copy.add_rows(pd.DataFrame(np.random.randint(100, size=(10, 4)), 
+                                   columns=['x', 'y', 'z', 'a']))
     pprint(dr1_copy.snapshot())
