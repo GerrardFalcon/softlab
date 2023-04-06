@@ -61,18 +61,19 @@ class Process(Delegated):
         """Get name of process"""
         return self._name
 
-    def get_data_group(self) -> Optional[DataGroup]:
+    @property
+    def data_group(self) -> Optional[DataGroup]:
         """Get binding data group"""
         return self._group
 
-    def set_data_group(self, group: DataGroup) -> None:
+    @data_group.setter
+    def data_group(self, group: Optional[DataGroup]) -> None:
         """Bind with given data group"""
-        if isinstance(group, DataGroup):
-            self._group = group
-        else:
+        if self.is_pending():
+            raise RuntimeError(f'Can\'t change data group while pending')
+        if group is not None and not isinstance(group, DataGroup):
             raise TypeError(f'Invalid data group type: {type(group)}')
-
-    data_group = property(get_data_group, set_data_group)
+        self._group = group
 
     def add_attribute(self, key: str, 
                       vals: Validator, initial_value: Any) -> None:
@@ -95,7 +96,7 @@ class Process(Delegated):
 
     @abstractmethod
     def is_pending(self) -> bool:
-        """Whether there are committed by unfinished actions"""
+        """Whether there are committed-but-unfinished actions"""
         raise NotImplementedError
 
     @abstractmethod
