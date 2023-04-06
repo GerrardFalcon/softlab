@@ -1,0 +1,71 @@
+[build-system]
+requires = [ "setuptools", ]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "softlab"
+dynamic = ["version", "readme"]
+description = "Toolkit to build software-defined laboratory"
+license = {text = "MIT"}
+requires-python = ">=3.7"
+authors = [
+    { name = "Edward Chou", email = "prettyage.new@gmail.com" },
+]
+keywords = [
+    "science",
+    "laboratory",
+    "toolkit",
+]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "matplotlib",
+    "plotly",
+    "numpy",
+    "scipy",
+    "pandas",
+    "imageio",
+    "ipywidgets",
+]
+
+[project.urls]
+Homepage = "https://github.com/hoolheart/softlab"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.setuptools.dynamic]
+version = {file = "softlab/VERSION.txt"}
+readme = {file = "README.rst"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["softlab", "softlab.*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+softlab = [
+    "VERSION.txt"
+]
+
+[tool.black]
+line-length = 80
+target-version = ["py39"]
+include = "\\.pyi?$"
+
+[tool.isort]
+profile = "black"
+src_paths = ["softlab", "tests"]

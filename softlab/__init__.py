@@ -1,11 +1,11 @@
 """Set up the main softlab namespace"""
 
-__major_version__ = 0
-__minor_version__ = 1
-__patch_version__ = 1
-
-__version__ = f'{__major_version__}.{__minor_version__}.{__patch_version__}'
+import pkgutil
+from softlab._version import get_version
 
 from softlab import (
     jin, mu, shui, huo, tu
 )
+
+__path__ = pkgutil.extend_path(__path__, __name__)
+__version__ = get_version()
