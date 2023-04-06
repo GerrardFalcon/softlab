@@ -15,3 +15,7 @@ from softlab.jin.validator import (
     ValEnum,
     ValSequence,
 )
+
+from softlab.jin.miscellaneous import (
+    print_progress,
+)

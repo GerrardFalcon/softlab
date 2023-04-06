@@ -6,13 +6,12 @@ from typing import (
     Dict,
     Optional,
     Tuple,
-    Sequence,
 )
 import asyncio
 import functools
 import logging
 import uuid
-from softlab.huo.base import (
+from softlab.huo.scheduler import (
     Action,
     Scheduler,
 )

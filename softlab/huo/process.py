@@ -18,8 +18,8 @@ from softlab.tu import (
 )
 from softlab.jin import Validator
 from softlab.shui.data import DataGroup
-from softlab.huo.base import Action, Scheduler
-from softlab.huo.impl import get_scheduler
+from softlab.huo.scheduler import Action, Scheduler
+from softlab.huo.impl_scheduler import get_scheduler
 
 _logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class Process(Delegated):
     attributes. Each attribute is an instance of ``LimitedAttribute``.
     ``add_attribute`` method is used to add such attribute by given unique key,
     validator and initial value.
-    
+
     The methods need be implemented in derived classes:
     - commit -- commit necessary actions into scheduler
     - is_pending -- whether there are committed by unfinished actions
@@ -49,6 +49,7 @@ class Process(Delegated):
     3. wait until all committed actions finish
     4. check whether there are more actions, if so, back to step 2
     """
+
     def __init__(self, name: Optional[str] = None):
         self._name = '' if name is None else str(name)
         self._attributes: Dict[str, LimitedAttribute] = {}

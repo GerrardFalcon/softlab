@@ -12,11 +12,11 @@ Submodule to organize dynamic processes
   to achieve compositions of subprocesses
 """
 
-from softlab.huo.base import (
+from softlab.huo.scheduler import (
     Action,
     Scheduler,
 )
-from softlab.huo.impl import get_scheduler
+from softlab.huo.impl_scheduler import get_scheduler
 
 from softlab.huo.process import (
     Process,
