@@ -60,11 +60,18 @@ class Process(Delegated):
     def name(self) -> str:
         """Get name of process"""
         return self._name
-
-    def get_data_group(self) -> Optional[DataGroup]:
+    
+    @property
+    def data_group(self) -> Optional[DataGroup]:
         """Get binding data group"""
         return self._group
+    
+    @data_group.setter
+    def data_group(self, group: Optional[DataGroup]) -> None:
+        """Bind with given data group"""
+        self.set_data_group(group)
 
+    @abstractmethod
     def set_data_group(self, group: Optional[DataGroup]) -> None:
         """Bind with given data group"""
         if self.is_pending():
@@ -72,8 +79,6 @@ class Process(Delegated):
         if group is not None and not isinstance(group, DataGroup):
             raise TypeError(f'Invalid data group type: {type(group)}')
         self._group = group
-
-    data_group = property(get_data_group, set_data_group)
 
     def add_attribute(self, key: str, 
                       vals: Validator, initial_value: Any) -> None:

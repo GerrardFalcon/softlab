@@ -119,7 +119,7 @@ def extract_group_to_folder(group: DataGroup, folder: str) -> tuple[int, int]:
         if isinstance(record, DataRecord):
             record.table.to_csv(
                 os.path.join(folder, f'{record.name}.csv',),
-                sep=', ', index=False)
+                sep=',', index=False)
             record_count = record_count + 1
             for c_name in record.charts:
                 chart = record.chart(c_name)
