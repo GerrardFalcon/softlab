@@ -16,4 +16,5 @@ from softlab.shui.data.io import (
     load_groups,
     reload_group,
     save_group,
+    extract_group_to_folder,
 )

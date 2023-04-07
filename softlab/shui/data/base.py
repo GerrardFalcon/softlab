@@ -18,6 +18,7 @@ import numpy as np
 import pandas as pd
 import uuid
 import datetime as dt
+from softlab.jin import match_dataframes
 
 class DataChart():
     """
@@ -160,7 +161,7 @@ class DataRecord():
         """Set data table"""
         if not isinstance(other, pd.DataFrame):
             raise TypeError(f'Invalid record table type: {type(other)}')
-        if other.columns != self._table.columns:
+        if not match_dataframes(other, self._table):
             raise ValueError('Table columns don\'t match')
         self._table = other.copy()
 
@@ -285,23 +286,24 @@ class DataRecord():
         """
         try:
             if isinstance(row, pd.DataFrame):
-                if (row.columns != self._table.columns).any():
-                    raise ValueError('Columns of the added rows don\'t match')
-                if len(self._table) > 0:
-                    data_types = {col: self._table[col].dtype \
-                                  for col in self._table.columns}
-                else:
-                    data_types = {col: row[col].dtype \
-                                  for col in self._table.columns}
-                self._table = pd.concat([self._table, row], ignore_index=True)\
-                    .astype(data_types)
+                new_rows = row
             elif isinstance(row, Dict):
-                self._table = pd.concat(
-                    [self._table, pd.DataFrame(row)],
-                    ignore_index=True,
-                )
+                try:
+                    new_rows = pd.DataFrame(row)
+                except:
+                    new_rows = pd.DataFrame([row])
             else:
-                raise ValueError(f'Type of row is invalid')
+                raise ValueError(f'Type of row is invalid {type(row)}')
+            if not match_dataframes(self._table, new_rows):
+                raise ValueError('Columns of the added rows don\'t match')
+            if len(self._table) > 0:
+                data_types = {col: self._table[col].dtype \
+                                for col in self._table.columns}
+            else:
+                data_types = {col: new_rows[col].dtype \
+                                for col in self._table.columns}
+            self._table = pd.concat([self._table, new_rows], ignore_index=True)\
+                .astype(data_types)
         except Exception:
             print(self._columns)
             print(row)

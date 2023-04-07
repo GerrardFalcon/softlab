@@ -242,6 +242,7 @@ class SimpleProcess(Process):
             ))
             if rst:
                 self._running = True
+                self._aborting = False
                 self._end_point = point
             return rst
         return False
