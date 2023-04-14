@@ -318,6 +318,47 @@ class ValNumber(ValType):
     def __repr__(self) -> str:
         return super().__repr__() + f' ({self._min} ~ {self._max})'
     
+class ValQuantifiedNumber(ValNumber):
+    """
+    Validator accepts quantified number value in given range
+
+    Args:
+        min --- minimal value
+        max --- maximal value
+        lsb --- least small bit, a.k.a. the unit of quantization
+        thre --- threshold to check quantization, default use ``1e-3 * lsb``
+    """
+
+    def __init__(self, 
+                 min: float = -float('inf'), 
+                 max: float = float('inf'),
+                 lsb: float = 1.0,
+                 thre: float = 0.0) -> None:
+        super().__init__(min, max)
+        if not isinstance(lsb, float) or lsb < 1e-18:
+            raise ValueError(f'Invalid LSB {lsb}')
+        self._lsb = lsb
+        if isinstance(thre, float) and thre > 0.0 and thre < lsb:
+            self._thre = thre
+        else:
+            self._thre = lsb * 1e-3
+    
+    @property
+    def lsb(self) -> float:
+        return self._lsb
+    
+    @property
+    def threshold(self) -> float:
+        return self._thre
+    
+    def validate(self, value: Any, context: str = '') -> None:
+        super().validate(value, context)
+        if (value%self.lsb) > self.threshold:
+            raise ValueError(f'{value} is not quantified')
+        
+    def __repr__(self) -> str:
+        return super().__repr__() + f' quantified by {self.lsb}'
+    
 class ValEnum(Validator):
     """Validator allows only one of given candidates"""
     
@@ -374,6 +415,8 @@ if __name__ == '__main__':
         ('prettyage.new@gmail.com', ValPattern('\w+@\w+(\.\w+)+')),
         ('prettyage.new@gmail.com', ValPattern('\w+(\.\w+)*@\w+(\.\w+)+')),
         (12.3, ValNumber(0.0, 100.0)),
+        (50.01, ValQuantifiedNumber(0.0, 100.0, 1.0)),
+        (50.01, ValQuantifiedNumber(0.0, 100.0, 1.0, 0.1)),
         ('on', ValEnum(('on', 'off'))),
         ('job', ValEnum(('on', 'off'))),
         ([], ValSequence(ValInt())),

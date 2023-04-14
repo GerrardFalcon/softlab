@@ -12,11 +12,13 @@ from softlab.jin.validator import (
     ValPattern,
     ValInt,
     ValNumber,
+    ValQuantifiedNumber,
     ValEnum,
     ValSequence,
 )
 
 from softlab.jin.miscellaneous import (
+    PrintPattern,
     print_progress,
     figure_to_array,
     match_dataframes,
