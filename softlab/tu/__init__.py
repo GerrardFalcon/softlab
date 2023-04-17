@@ -9,6 +9,7 @@ from softlab.tu.limited_attribute import LimitedAttribute
 from softlab.tu.parameter import (
     Parameter,
     QuantizedParameter,
+    ProxyParameter,
 )
 
 from softlab.tu.device import (

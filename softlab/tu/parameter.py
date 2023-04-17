@@ -22,7 +22,7 @@ class Parameter():
 
     There are 5 properties:
         name --- non-empty string representing the parameter
-        validator --- description of the validator that guards the input of 
+        validator --- description of the validator that guards the input of
                       parameter, read-only
         settable --- whether the parameter can be set, read-only
         gettable --- whether the parameter can be get, read-only
@@ -208,7 +208,7 @@ class Parameter():
             the interpreted value for caller of ``get``
         """
         return value
-    
+
 class QuantizedParameter(Parameter):
     """
     Parameter with quantized inner data
@@ -253,7 +253,7 @@ class QuantizedParameter(Parameter):
     def lsb(self) -> float:
         """Get least sigificant bit"""
         return self._lsb
-    
+
     @property
     def mode(self) -> str:
         """Get quantization mode"""
@@ -262,7 +262,7 @@ class QuantizedParameter(Parameter):
         elif self._quantizer == math.ceil:
             return 'ceil'
         return 'round'
-    
+
     def snapshot(self) -> dict:
         s = super().snapshot()
         s['lsb'] = self.lsb
@@ -271,10 +271,27 @@ class QuantizedParameter(Parameter):
 
     def parse(self, value: float) -> int:
         return self._quantizer(value / self._lsb)
-    
+
     def interprete(self, value: int) -> float:
         return self._lsb * value
-    
+
+class ProxyParameter(Parameter):
+
+    def __init__(self, name: str, obj: Parameter,
+                 owner: Optional[Any] = None) -> None:
+        if not isinstance(obj, Parameter):
+            raise TypeError(f'Invalid paramter to proxy: {type(obj)}')
+        super().__init__(name,
+                         obj._validator, obj.settable, obj.gettable,
+                         owner=owner)
+        self._obj = obj
+
+    def set(self, value: Any) -> None:
+        self._obj.set(value)
+
+    def get(self) -> Any:
+        return self._obj.get()
+
 if __name__ == '__main__':
     from softlab.jin import (
         ValType,
@@ -293,7 +310,12 @@ if __name__ == '__main__':
         (Parameter('bool', ValType(bool), owner='pk'), False),
         (QuantizedParameter('adc', False, lsb=100.0/256, init_value=18), 13.2),
         (QuantizedParameter('dac', gettable=False, lsb=150.0/65536), 89.2),
-        (QuantizedParameter('quantizer', min=-20.0, max=20.0, lsb=40.0/65536, owner='pk'), -10.328977345),
+        (QuantizedParameter('quantizer', min=-20.0, max=20.0, lsb=40.0/65536,
+                            owner='pk'), -10.328977345),
+        (ProxyParameter('proxy1',
+                        Parameter('int1', ValInt(0, 100), gettable=False)), 73),
+        (ProxyParameter('proxy2',
+                        Parameter('int2', ValInt(0, 100), init_value=50)), 103),
     ]:
         print(f'-------- {para} --------')
         print(para.snapshot())
