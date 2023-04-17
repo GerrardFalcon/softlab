@@ -11,6 +11,7 @@ from softlab.jin.validator import (
     ValString,
     ValPattern,
     ValInt,
+    ValQuantifiedInt,
     ValNumber,
     ValQuantifiedNumber,
     ValEnum,
