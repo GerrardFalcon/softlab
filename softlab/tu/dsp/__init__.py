@@ -56,6 +56,7 @@ from softlab.tu.dsp.base import (
 from softlab.tu.dsp.common import (
     FunctionalSignal,
     FixedSignal,
+    LinearSignal,
     PeriodicSignal,
     SineSignal,
     ComplexSineSignal,

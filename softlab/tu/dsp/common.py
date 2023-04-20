@@ -18,7 +18,7 @@ from softlab.tu.dsp.base import Signal
 class FunctionalSignal(Signal):
     """
     A signal defined by a given function
-    
+
     Args:
         - name, signal name, optional
         - sig_func, a callable function defining the signal behavior
@@ -56,6 +56,27 @@ class FixedSignal(Signal):
 
     def evaluate(self, ts: np.ndarray) -> np.ndarray:
         return np.ones_like(ts, dtype=type(self.fixed())) * self.fixed()
+
+class LinearSignal(Signal):
+    """
+    A signal as linear function of time, a.k.a. ``coeff * time + offset``
+
+    Args:
+        - coeff, the coefficient on the time
+        - offset, the offset on the output
+    """
+
+    def __init__(self, name: Optional[str] = None,
+                 coeff: float = 1.0, offset: float = 0.0) -> None:
+        super().__init__(name)
+        self.add_attribute('coeff', ValNumber(), coeff)
+        self.add_attribute('offset', ValNumber(), offset)
+
+    def __repr__(self) -> str:
+        return super().__repr__() + f' ({self.coeff()}, {self.offset()})'
+
+    def evaluate(self, ts: np.ndarray) -> np.ndarray:
+        return self.coeff() * ts + self.offset()
 
 class PeriodicSignal(Signal):
     """
@@ -97,22 +118,22 @@ class PeriodicSignal(Signal):
     def cycle(self, c: float) -> None:
         """Set cycle"""
         self.freq(1.0 / c)
-    
+
     @property
     def omega(self) -> float:
         """Circular frequency"""
         return self.freq() * 2.0 * np.pi
-    
+
     @omega.setter
     def omega(self, w: float = 6.28e3) -> None:
         """Set circular frequency"""
         self.freq(w / 2.0 / np.pi)
-    
+
     @property
     def phase_deg(self) -> float:
         """Initial phase in degree"""
         return np.rad2deg(self.phase())
-    
+
     @phase_deg.setter
     def phase_deg(self, phi: float = 0.0) -> None:
         """Set initial phase in degree"""
@@ -144,7 +165,7 @@ class TriangleSignal(PeriodicSignal):
 class RampSignal(PeriodicSignal):
     """
     Ramp signal, 0.0 -> amp -> 0.0 in phase 0.0 and offset 0.0 case
-    
+
     Subclass of PeriodicSignal with an additional argument:
     - width_ratio -- ratio of ramp part, 0.0 ~ 1.0, ramp signal with 0.5 width
                      ratio is equivelant to triangle signal, default is 0.9
@@ -175,7 +196,7 @@ class RampSignal(PeriodicSignal):
 class SquareSignal(PeriodicSignal):
     """
     Square signal, a cycle consists of a high level and a low level
-    
+
     Subclass of PeriodicSignal with an additional argument:
     - width_ratio -- ratio of high part, 0.0 ~ 1.0, default is 0.5
 
@@ -229,7 +250,7 @@ class PulseSignal(Signal):
 class ChirpSignal(PulseSignal):
     """
     Linear chirp signal
-    
+
     Subclass of ``PulseSignal`` with 4 additional arguments:
     - amp -- amplitude, defalut: 1.0
     - freq_begin -- frequency at the beginning of pulse, unit: Hz, default: 1e3
@@ -285,7 +306,7 @@ class ExpoChirpSignal(ChirpSignal):
             norm = moved / self.duration()
             freqs = np.zeros_like(ts)
             log0, log1 = np.log10(self.freq_begin()), np.log10(self.freq_end())
-            freqs[valids] = np.power(10.0, 
+            freqs[valids] = np.power(10.0,
                 norm[valids] * log1 + (1.0 - norm[valids]) * log0)
             phases = np.zeros_like(ts)
             phases[valids] = 2 * np.pi * freqs[valids] * moved[valids] \
@@ -302,15 +323,16 @@ if __name__ == '__main__':
     plt.figure(figsize=(15, 12))
     rows, cols, index = 3, 3, 1
     for signal in [
+        LinearSignal('linear', 0.2, 0.5),
         SineSignal('sine', 0.75, 1e3, np.pi / 2.0),
         TriangleSignal('triangle', 0.9, 2e3, np.pi / 4.0),
         RampSignal('ramp', 0.8, freq=1.5e3),
         SquareSignal('square', 0.6, freq=4.0e3, phase=np.pi),
-        ChirpSignal('chip1', freq_begin=30e3, freq_end=10e3, 
-                    begin=0.1e-3, duration=1e-3),
-        ChirpSignal('chip2', amp=0.5, freq_begin=10e3, freq_end=20e3, 
+        #ChirpSignal('chip1', freq_begin=30e3, freq_end=10e3,
+        #            begin=0.1e-3, duration=1e-3),
+        ChirpSignal('chip2', amp=0.5, freq_begin=10e3, freq_end=20e3,
                     duration=0.8e-3),
-        ExpoChirpSignal('expo_chirp', freq_begin=30e3, freq_end=10e3, 
+        ExpoChirpSignal('expo_chirp', freq_begin=30e3, freq_end=10e3,
                         begin=0.1e-3, duration=1e-3),
     ]:
         ys = signal(ts)
