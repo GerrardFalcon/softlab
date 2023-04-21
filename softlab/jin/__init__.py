@@ -16,6 +16,7 @@ from softlab.jin.validator import (
     ValQuantifiedNumber,
     ValEnum,
     ValSequence,
+    ValRange,
 )
 
 from softlab.jin.miscellaneous import (

@@ -430,6 +430,42 @@ class ValSequence(Validator):
             return f'<ValSequence({self._child})>'
         return '<ValSequence>'
 
+
+class ValRange(ValType):
+
+    def __init__(self,
+                 min: float, max: float,
+                 min_range: float = 0.0,
+                 max_range: float = float('inf')) -> None:
+        super().__init__(tuple)
+        if not isinstance(min, float) or not isinstance(max, float):
+            raise TypeError(f'Invalid input types {type(min)}, {type(max)}')
+        if min < max:
+            self._min = min
+            self._max = max
+        else:
+            raise ValueError(f'Invalid interval {min} - {max}')
+        self._min_range = min_range if isinstance(min_range, float) and \
+            min_range > 0.0 else 0.0
+        self._max_range = max_range if isinstance(max_range, float) and \
+            max_range > min_range else float('inf')
+
+    def validate(self, value: Any, context: str = '') -> None:
+        super().validate(value, context)
+        if len(value) != 2:
+            raise ValueError(
+                f'Invalid range element count {len(value)}, {context}')
+        a, b = value
+        if not isinstance(a, float) or not isinstance(b, float):
+            raise TypeError(
+                f'Invalid range element types {type(a)}, {type(b)}, {context}')
+        if a > b or a < self._min or b > self._max or \
+                (b-a) < self._min_range or (b-a) > self._max_range:
+            raise ValueError(f'Invalid range {a}~{b}, {context}')
+
+    def __repr__(self) -> str:
+        return super().__repr__() + f'(range {self._min} ~ {self._max})'
+
 if __name__ == '__main__':
     for value, validator in [
         ('5', ValType(str)),
@@ -447,6 +483,8 @@ if __name__ == '__main__':
         ([], ValSequence(ValInt())),
         ([-5, 6, 78], ValSequence(ValInt(0, 100))),
         (('5', 5), ValSequence()),
+        ((0.0, 5.0), ValRange(0.0, 10.0, 1.0)),
+        ((0.0, 60.0), ValRange(0.0, 100.0, 10.0, 50.0)),
     ]:
         rst = validate_value(value, validator, 'demo')
         print(f'validate {value} by {validator}: {rst}')
