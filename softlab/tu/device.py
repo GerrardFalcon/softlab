@@ -16,6 +16,9 @@ from typing import (
     Any,
     Dict,
     Optional,
+    Sequence,
+    Tuple,
+    Union,
 )
 from softlab.tu.helpers import Delegated
 from softlab.tu.parameter import Parameter
@@ -50,7 +53,7 @@ class Device(Delegated):
     def name(self) -> str:
         """Get device name"""
         return self._name
-    
+
     @name.setter
     def name(self, name: str) -> None:
         """Change device name"""
@@ -63,7 +66,7 @@ class Device(Delegated):
     def parent(self) -> Optional["Device"]:
         """Get parent device"""
         return self._parent
-    
+
     @parent.setter
     def parent(self, parent: Optional["Device"]) -> None:
         """Set parent device, only valid for a different device or None"""
@@ -100,9 +103,23 @@ class Device(Delegated):
 
         Returns:
             the parameter instance, None if non-exist
+
+        Note:
+            user can use '.' to link child name,
+            e.g. <child_name>.<parameter_name> or even
+            <child_name>.<child_child_name>.<parameter_name>
         """
         if key in self._parameters:
             return self._parameters[key]
+        parts = key.split('.')
+        if len(parts) > 1:
+            cur_dev = self
+            for child_name in parts[:-1]:
+                cur_dev = cur_dev.child(child_name)
+                if cur_dev is None:
+                    break
+            if isinstance(cur_dev, Device):
+                return cur_dev.parameter(parts[-1])
         return None
 
     def child(self, key: str) -> Optional["Device"]:
@@ -142,7 +159,7 @@ class Device(Delegated):
     def add_child(self, child: "Device", visible: bool = True) -> None:
         """
         Add a child device into device
-        
+
         Args:
             child --- child device instance, its name as its key should not be
                       used in existing parameter dict and child device dict
@@ -172,7 +189,27 @@ class Device(Delegated):
         if isinstance(child, Device):
             child.parent = None
         return child
-    
+
+    def set_parameters(self, settings: Union[Sequence[Tuple[str, Any]],
+                                             Dict[str, Any]]) -> None:
+        """
+        Set any number of parameters
+
+        Args:
+            settings --- setting information, either be the sequence of
+                         key-value pairs or dictionary of keys and values,
+                         note that the sequence form can control the setting
+                         order
+        """
+        if isinstance(settings, Dict):
+            settings = settings.items()
+        for key, value in settings:
+            para = self.parameter(key)
+            if isinstance(para, Parameter):
+                para(value)
+            else:
+                raise KeyError(f'Invalid parameter key {key}')
+
     @abstractmethod
     def open(self) -> None:
         """Open/connect the device, needs implementation"""
@@ -182,18 +219,18 @@ class Device(Delegated):
     def close(self) -> None:
         """Close/disconnect the device, needs implementation"""
         pass
-    
+
 class DeviceBuilder():
     """
     Builder to gerenate specific device.
-    
+
     Different builders differ due to their different models.
     """
 
     def __init__(self, model: str) -> None:
         """
         Initialization
-        
+
         Args:
             model --- builder model
         """
@@ -209,7 +246,7 @@ class DeviceBuilder():
 
     def __repr__(self) -> str:
         return f'<DeviceBuilder>{self.model}'
-    
+
     def build(self, name: str, **kwargs: Any) -> Device:
         """
         Generate a device, implemented in sub classes
@@ -217,12 +254,12 @@ class DeviceBuilder():
         Args:
             name --- device name
             kwargs --- key specific arguments to create device
-        
+
         Returns:
             a device corresponding to such builder
         """
         raise NotImplementedError
-    
+
 _device_builders: Dict[str, DeviceBuilder] = {}
 """Global dictionary of device builders"""
 
@@ -263,7 +300,11 @@ if __name__ == '__main__':
     print('After setting')
     print(f'Parameter values: {dev.para0()}, {dev.para1()}, '
           f'{dev.para2()}, {dev.child0.para3()}')
-    
+    dev.set_parameters({'para0': 5.0, 'para1': 0.1, 'child0.para3': 0.97})
+    print('After batch setting')
+    print(f'Parameter values: {dev.para0()}, {dev.para1()}, '
+          f'{dev.para2()}, {dev.child0.para3()}')
+
     class _BuilderDemo(DeviceBuilder):
         def __init__(self) -> None:
             super().__init__('demo')
@@ -273,7 +314,7 @@ if __name__ == '__main__':
             dev.add_parameter(
                 Parameter('percentage', ValNumber(0.0, 100.0), init_value=3.14))
             return dev
-        
+
     builder = _BuilderDemo() # create a demo builder
     print(f'Create demo builder {builder}')
     dev2 = builder.build('built')
