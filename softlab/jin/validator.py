@@ -41,7 +41,7 @@ class ValidatorAll(Validator):
     Validator requires value satisfying all sub validators
 
     Args:
-        validators --- sequence of sub validators
+    - validators --- sequence of sub validators
     """
 
     def __init__(self, validators: Sequence[Validator]) -> None:
@@ -67,7 +67,7 @@ class ValidatorAny(Validator):
     Validator requires value satisfying at least one sub validators
 
     Args:
-        validators --- sequence of sub validators
+    - validators --- sequence of sub validators
     """
 
     def __init__(self, validators: Sequence[Validator]) -> None:
@@ -159,16 +159,16 @@ class ValString(ValType):
     Validator only accepts string with valid length
 
     Initialization arguments:
-        min_length --- minimal limit of string length, default is 0
-        max_length --- maximal limit of string length, default is -1 (no limit)
+    - min_length --- minimal limit of string length, default is 0
+    - max_length --- maximal limit of string length, default is -1 (no limit)
 
     Raises:
-            TypeError --- min_length and/or max_length are not intergers
-            ValueError --- max_length is non-negative but < min_length
+    - TypeError --- min_length and/or max_length are not intergers
+    - ValueError --- max_length is non-negative but < min_length
 
     Properties:
-        min_length --- minimal limit of string length
-        max_length --- maximal limit of string length
+    - min_length --- minimal limit of string length
+    - max_length --- maximal limit of string length
     """
 
     def __init__(self, min_length: int = 0, max_length: int = -1) -> None:
@@ -219,7 +219,7 @@ class ValPattern(ValType):
     Validator for strings with given pattern
 
     Args:
-        pattern --- the regular expression to define string pattern
+    - pattern --- the regular expression to define string pattern
     """
 
     def __init__(self, pattern: str) -> None:
@@ -247,8 +247,8 @@ class ValInt(ValType):
     Validator accepts int or np.integer in given range
 
     Args:
-        min --- minimal value
-        max --- maximal value
+    - min --- minimal value
+    - max --- maximal value
     """
 
     _BIGGEST = int(0x7fffffff)
@@ -280,7 +280,16 @@ class ValInt(ValType):
     def __repr__(self) -> str:
         return super().__repr__() + f' ({self._min} ~ {self._max})'
 
+
 class ValQuantifiedInt(ValInt):
+    """
+    Validator accepts quantified integer in given range
+
+    Args:
+    - min --- minimal value
+    - max --- maximal value
+    - lsb --- least small bit, a.k.a. the unit of quantization
+    """
 
     def __init__(self,
                  min: int = -ValInt._BIGGEST - 1,
@@ -308,8 +317,8 @@ class ValNumber(ValType):
     Validator accepts all kinds of number value in given range
 
     Args:
-        min --- minimal value
-        max --- maximal value
+    - min --- minimal value
+    - max --- maximal value
     """
 
     def __init__(self,
@@ -346,10 +355,10 @@ class ValQuantifiedNumber(ValNumber):
     Validator accepts quantified number value in given range
 
     Args:
-        min --- minimal value
-        max --- maximal value
-        lsb --- least small bit, a.k.a. the unit of quantization
-        thre --- threshold to check quantization, default use ``1e-3 * lsb``
+    - min --- minimal value
+    - max --- maximal value
+    - lsb --- least small bit, a.k.a. the unit of quantization
+    - thre --- threshold to check quantization, default use ``1e-3 * lsb``
     """
 
     def __init__(self,
@@ -407,7 +416,7 @@ class ValSequence(Validator):
     Validator requires value is a sequence of elements satisfying sub validator
 
     Property:
-        validator_of_element --- validator of element in sequence
+    - validator_of_element --- validator of element in sequence
     """
 
     def __init__(self, child: Optional[Validator] = None) -> None:
@@ -432,6 +441,15 @@ class ValSequence(Validator):
 
 
 class ValRange(ValType):
+    """
+    Validator requires a pair of float numbers to represent a value range
+
+    Args:
+    - min --- minimal value
+    - max --- maximal value
+    - min_range --- minimal range, default is 0.0
+    - max_range --- maximal range, default is infinite
+    """
 
     def __init__(self,
                  min: float, max: float,
